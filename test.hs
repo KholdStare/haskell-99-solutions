@@ -68,8 +68,25 @@ flatten ( List (x:xs) ) = ( flatten x ) ++ flatten (List xs)
 
 {-problem 8-}
 compress :: Eq a => [a] -> [a]
-compress = foldl f []
-    where f [] a = [a]
-          f l a
+compress = foldl skipDups []
+    where skipDups [] a = [a]
+          skipDups l a
             | (last l) == a  = l
             | otherwise      = l ++ [a]
+
+{-problem 9-}
+pack :: Eq a => [a] -> [[a]]
+pack = ( map extend ) . (foldr countDups [])
+    where countDups a [] = [(a, 1)]
+          -- ^ countDups turns duplicate consecutive elements into
+          -- a tuple with that element and count
+          countDups a tuples
+            | a == b     = (b, n+1):(tail tuples)
+            | otherwise  = (countDups a []) ++ tuples
+                where tuple = head tuples
+                      b     = fst tuple
+                      n     = snd tuple
+          extend (a, n) = map (\_ -> a) [1..n]
+          -- ^ extend takes a tuple with an element and count, and
+          -- converts it to a list with n elements a
+
