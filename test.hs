@@ -75,22 +75,31 @@ compress = foldl skipDups []
             | otherwise      = l ++ [a]
 
 {-problem 10-}
-encode :: ( Eq a, Num b ) => [a] -> [(a, b)]
+encode :: ( Eq a ) => [a] -> [(Int, a)]
 encode = foldr countDups []
-    where countDups a [] = [(a, 1)]
+    where countDups a [] = [(1, a)]
           -- ^ countDups turns duplicate consecutive elements into
           -- a tuple with that element and count
           countDups a tuples
-            | a == b     = (b, n+1):(tail tuples)
+            | a == b     = (n+1, b):(tail tuples)
             | otherwise  = (countDups a []) ++ tuples
                 where tuple = head tuples
-                      b     = fst tuple
-                      n     = snd tuple
+                      b     = snd tuple
+                      n     = fst tuple
 
 {-problem 9-}
 pack :: Eq a => [a] -> [[a]]
 pack = ( map extend ) . encode
-    where extend (x, n) = map (\_ -> x) [1..n]
+    where extend (n, x) = map (\_ -> x) [1..n]
           -- ^ extend takes a tuple with an element and count, and
           -- converts it to a list with n elements a
 
+{-problem 11-}
+data RunLength a = Single a | Multiple Int a
+    deriving Show
+
+encodeModified :: (Eq a) => [a] -> [ RunLength a ]
+encodeModified = map convert . encode
+    where convert (n, a)
+                | n == 1    = Single a
+                | otherwise = Multiple n a
