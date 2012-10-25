@@ -74,9 +74,9 @@ compress = foldl skipDups []
             | (last l) == a  = l
             | otherwise      = l ++ [a]
 
-{-problem 9-}
-pack :: Eq a => [a] -> [[a]]
-pack = ( map extend ) . (foldr countDups [])
+{-problem 10-}
+encode :: ( Eq a, Num b ) => [a] -> [(a, b)]
+encode = foldr countDups []
     where countDups a [] = [(a, 1)]
           -- ^ countDups turns duplicate consecutive elements into
           -- a tuple with that element and count
@@ -86,7 +86,11 @@ pack = ( map extend ) . (foldr countDups [])
                 where tuple = head tuples
                       b     = fst tuple
                       n     = snd tuple
-          extend (a, n) = map (\_ -> a) [1..n]
+
+{-problem 9-}
+pack :: Eq a => [a] -> [[a]]
+pack = ( map extend ) . encode
+    where extend (x, n) = map (\_ -> x) [1..n]
           -- ^ extend takes a tuple with an element and count, and
           -- converts it to a list with n elements a
 
