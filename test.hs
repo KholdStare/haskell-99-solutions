@@ -56,7 +56,7 @@ isPalindrome'' = duplicate $ (==) . reverse
     where duplicate f a = f a a
 
 isPalindrome''' ::  Eq a => [a] -> Bool
-isPalindrome''' xs = foldr (&&) True (zipWith (==) xs $ myReverse xs) 
+isPalindrome''' xs = foldl (&&) True (zipWith (==) xs $ myReverse xs) 
 
 {-problem 7-}
 data NestedList a = Elem a | List [NestedList a]
@@ -103,3 +103,23 @@ encodeModified = map convert . encode
     where convert (n, a)
                 | n == 1    = Single a
                 | otherwise = Multiple n a
+
+{-problem 12-}
+decodeModified :: [ RunLength a ] -> [a]
+-- | Realized that "foldl (++) [] . map" is concatMap,
+-- | but will keep it because it looks sophisticated :P
+decodeModified = foldl (++) [] . map expand
+    where expand ( Single a )     = [a]
+          expand ( Multiple n a ) = replicate n a
+
+{-problem 13-}
+encodeDirect :: ( Eq a ) => [a] -> [ RunLength a ]
+encodeDirect = map simplify . foldr countDups []
+    where countDups a [] = [Multiple 1 a]
+          countDups a acc
+            | a == b     = (Multiple (n+1) b):(tail acc)
+            | otherwise  = (countDups a []) ++ acc
+                where Multiple n b = head acc
+          simplify ( Multiple 1 a ) = Single a
+          simplify a = a
+
