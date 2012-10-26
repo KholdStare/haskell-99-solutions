@@ -128,3 +128,8 @@ encodeDirect = map simplify . foldr countDups []
 {-problem 14-}
 dupli :: [a] -> [a]
 dupli = concatMap $ replicate 2
+
+{-problem 15-}
+repli :: [a] -> Int -> [a]
+repli = flip $ concatMap . replicate
+
