@@ -1,3 +1,5 @@
+import Data.List
+
 fac 0 = 1
 fac x = x * fac (x - 1)
 
@@ -108,7 +110,7 @@ encodeModified = map convert . encode
 decodeModified :: [ RunLength a ] -> [a]
 -- | Realized that "foldl (++) [] . map" is concatMap,
 -- | but will keep it because it looks sophisticated :P
-decodeModified = foldl (++) [] . map expand
+decodeModified = foldl' (++) [] . map expand
     where expand ( Single a )     = [a]
           expand ( Multiple n a ) = replicate n a
 
@@ -123,3 +125,6 @@ encodeDirect = map simplify . foldr countDups []
           simplify ( Multiple 1 a ) = Single a
           simplify a = a
 
+{-problem 14-}
+dupli :: [a] -> [a]
+dupli = concatMap $ replicate 2
