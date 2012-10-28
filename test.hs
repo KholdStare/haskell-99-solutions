@@ -161,3 +161,10 @@ slice l start end = drop (start-1) $ take end l
 rotate ::  [a] -> Int -> [a]
 rotate l n = uncurry ( flip (++) ) $ splitAt index l 
     where index = mod n (length l)
+
+{-problem 20-}
+removeAt :: Int -> [a] -> (a, [a])
+removeAt n l = (removed, rest)
+    where (start, end)  = splitAt n l
+          removed = last start
+          rest = init start ++ end
