@@ -186,7 +186,13 @@ range i n
 {-problem 23-}
 rndSelect :: [a] -> Int -> IO [a]
 rndSelect _ 0 = return []
-rndSelect l n = do  i <- getStdRandom (randomR (0 :: Int, length l - 1))
-                    rest <- rndSelect l (n-1)
-                    let elem = l !! i
-                    return ( elem:rest )
+rndSelect l n = do  i <- getStdRandom (randomR (0 :: Int, length l - 1)) 
+                    let (elem, remaining) = removeAt i l                 
+                    acc <- rndSelect remaining (n-1)                   
+                    return ( elem:acc )                                 
+-- note to self: replicateM can be used to generate a monadic list of values,
+-- which can then be used in list comprehensions!
+
+{-problem 24-}
+rndInRange :: Int -> Int -> IO [Int]
+rndInRange = flip $ rndSelect  . ( enumFromTo 1 )
