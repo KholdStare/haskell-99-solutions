@@ -152,3 +152,7 @@ split l n = helper l n
           helper l 0 = ([], l)
           helper (x:xs) a = (x:(fst result), snd result)
             where result = helper xs (a-1)
+
+{-problem 18-}
+slice :: [a] -> Int -> Int -> [a]
+slice l start end = drop (start-1) $ take end l
