@@ -135,12 +135,20 @@ repli = flip $ concatMap . replicate
 
 {-problem 16-}
 dropNth :: [a] -> Int -> [a]
-dropNth l n = dropNth' l n n
-    where dropNth' [] _ _     = []
-          dropNth' (x:xs) n 1 = dropNth' xs n n
-          dropNth' (x:xs) n a = x:(dropNth' xs n (a-1))
+dropNth l n = dropNth' l n
+    where dropNth' [] _     = []
+          dropNth' (x:xs) 1 = dropNth' xs n
+          dropNth' (x:xs) a = x:(dropNth' xs (a-1))
 
-dropNth'' :: Int -> [a] -> [a]
-dropNth'' n = ( uncurry (++) ) . process . ( splitAt n )
-    where process ([], []) = ([], [])
-          process (h, t) = (take (n-1) h, dropNth'' n t)
+dropNth'' :: [a] -> Int -> [a]
+dropNth'' = flip $ \n -> ( uncurry (++) ) . (process n) . ( splitAt n )
+    where process _ ([], []) = ([], [])
+          process n (h, t) = (take (n-1) h, dropNth'' t n)
+
+{-problem 17-}
+split :: [a] -> Int -> ([a], [a])
+split l n = helper l n
+    where helper [] _ = ([], [])
+          helper l 0 = ([], l)
+          helper (x:xs) a = (x:(fst result), snd result)
+            where result = helper xs (a-1)
