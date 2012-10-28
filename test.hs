@@ -1,4 +1,5 @@
 import Data.List
+import System.Random
 
 fac 0 = 1
 fac x = x * fac (x - 1)
@@ -181,3 +182,11 @@ range i n
     | i == n    = [n]
     | i < n     = i:range (i+1) n
     | i > n     = i:range (i-1) n
+
+{-problem 23-}
+rndSelect :: [a] -> Int -> IO [a]
+rndSelect _ 0 = return []
+rndSelect l n = do  i <- getStdRandom (randomR (0 :: Int, length l - 1))
+                    rest <- rndSelect l (n-1)
+                    let elem = l !! i
+                    return ( elem:rest )
