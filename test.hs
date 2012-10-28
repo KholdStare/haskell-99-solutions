@@ -164,9 +164,10 @@ rotate l n = uncurry ( flip (++) ) $ splitAt index l
     where index = mod n (length l)
 
 {-problem 20-}
+-- | zero-indexed version.
 removeAt :: Int -> [a] -> (a, [a])
 removeAt n l = (removed, rest)
-    where (start, end)  = splitAt n l
+    where (start, end)  = splitAt (n+1) l
           removed = last start
           rest = init start ++ end
 
@@ -196,3 +197,8 @@ rndSelect l n = do  i <- getStdRandom (randomR (0 :: Int, length l - 1))
 {-problem 24-}
 rndInRange :: Int -> Int -> IO [Int]
 rndInRange = flip $ rndSelect  . ( enumFromTo 1 )
+
+{-problem 25-}
+rndPerm :: [a] -> IO [a]
+rndPerm x@(_:[]) = return x {- not strictly necessary -}
+rndPerm l = rndSelect l (length l)
