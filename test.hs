@@ -156,3 +156,8 @@ split l n = helper l n
 {-problem 18-}
 slice :: [a] -> Int -> Int -> [a]
 slice l start end = drop (start-1) $ take end l
+
+{-problem 19-}
+rotate ::  [a] -> Int -> [a]
+rotate l n = uncurry ( flip (++) ) $ splitAt index l 
+    where index = mod n (length l)
