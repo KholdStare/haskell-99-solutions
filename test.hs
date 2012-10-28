@@ -168,3 +168,16 @@ removeAt n l = (removed, rest)
     where (start, end)  = splitAt n l
           removed = last start
           rest = init start ++ end
+
+{-problem 21-}
+-- | zero-indexed version. Cleaner than 1-based
+insertAt :: a -> [a] -> Int -> [a]
+insertAt elem l i = start ++ [elem] ++ end
+    where (start, end) = splitAt i l
+
+{-problem 22-}
+range :: Int -> Int -> [Int]
+range i n
+    | i == n    = [n]
+    | i < n     = i:range (i+1) n
+    | i > n     = i:range (i-1) n
