@@ -202,3 +202,11 @@ rndInRange = flip $ rndSelect  . ( enumFromTo 1 )
 rndPerm :: [a] -> IO [a]
 rndPerm x@(_:[]) = return x {- not strictly necessary -}
 rndPerm l = rndSelect l (length l)
+
+{-problem 26-}
+combinations :: Int -> [a] -> [[a]]
+combinations 0 _ = [[]]
+combinations n l = do i <- [0..( length l - 1 )]
+                      let (x, remaining) = removeAt i l
+                      others <- (combinations (n-1) remaining)
+                      return ( x:others )
