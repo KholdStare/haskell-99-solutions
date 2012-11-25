@@ -1,4 +1,5 @@
-import Data.List
+import qualified Data.List as DL
+import qualified Data.Set as Set
 import System.Random
 
 fac 0 = 1
@@ -111,7 +112,7 @@ encodeModified = map convert . encode
 decodeModified :: [ RunLength a ] -> [a]
 -- | Realized that "foldl (++) [] . map" is concatMap,
 -- | but will keep it because it looks sophisticated :P
-decodeModified = foldl' (++) [] . map expand
+decodeModified = DL.foldl' (++) [] . map expand
     where expand ( Single a )     = [a]
           expand ( Multiple n a ) = replicate n a
 
@@ -210,3 +211,43 @@ combinations n l = do i <- [0..( length l - 1 )]
                       let (x, remaining) = removeAt i l
                       others <- (combinations (n-1) remaining)
                       return ( x:others )
+
+{-problem 27-}
+-- | Given a list of group sizes that add up to at most the size of
+-- the second list, return a list of lists using the groups
+splitBy :: [Int] -> [a] -> [[a]]
+splitBy [] _ = []
+splitBy groupings@(g:gs) l = group:(splitBy gs rest)
+    where (group, rest) = splitAt g l
+
+genSelVecs :: [Int] -> Set.Set [Int]
+-- | given a groupings list, generate a list
+-- | of unique selection vectors
+-- | e.g. [2,3] -> [[0,0,1,1,1] , ... ]
+genSelVecs gs = Set.fromList $ combinations (sum gs) $ concat $ zipWith (replicate) gs groupIDs
+        where groupIDs = [0..(length gs - 1)]
+-- | TODO: "uniqueify-ing" this list is the main bottlneck
+
+insertIntoNth :: a -> Int -> [[a]] -> [[a]]
+-- | Given a value and an index n, insert the value
+-- | into the nth list
+insertIntoNth val 0 (x:xss) = (val:x) : xss
+insertIntoNth val n (x:xss) = x : insertIntoNth val (n-1) xss
+insertIntoNth val _ _ = [[]]
+
+groupWith :: [Int] -> [a] -> [[a]]
+-- | Given a selection vector like [0, 0, 1, 1, 1]
+-- | and a list of items, separate the list into groups
+-- | using the selection vector
+groupWith selVec xs = let numGroups = maximum selVec + 1
+                          emptyGroups = replicate numGroups []
+                          groupAssignments = zip xs selVec
+                          in DL.foldl' (flip $ uncurry insertIntoNth) emptyGroups groupAssignments
+
+{-groupWith [0, 1, 0, 0, 1] "abcde" == [ "dca", "eb" ]-}
+
+genGroups :: Ord a => [Int] -> [a] -> [[[a]]]
+genGroups groupings xs = map ( ( flip groupWith ) xs ) selVecs
+        where selVecs = Set.toList $ genSelVecs groupings
+
+main = print $ length $ genGroups [2, 3, 4] "abcdefghi"
