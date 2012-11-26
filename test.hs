@@ -1,5 +1,7 @@
 import qualified Data.List as DL
+import qualified Data.Ord as DO
 import qualified Data.Set as Set
+import qualified Data.IntMap.Strict as IntMap
 import System.Random
 
 fac 0 = 1
@@ -213,12 +215,7 @@ combinations n l = do i <- [0..( length l - 1 )]
                       return ( x:others )
 
 {-problem 27-}
--- | Given a list of group sizes that add up to at most the size of
--- the second list, return a list of lists using the groups
-splitBy :: [Int] -> [a] -> [[a]]
-splitBy [] _ = []
-splitBy groupings@(g:gs) l = group:(splitBy gs rest)
-    where (group, rest) = splitAt g l
+-- not as elegant/efficient a solution as the reference.
 
 genSelVecs :: [Int] -> Set.Set [Int]
 -- | given a groupings list, generate a list
@@ -226,7 +223,7 @@ genSelVecs :: [Int] -> Set.Set [Int]
 -- | e.g. [2,3] -> [[0,0,1,1,1] , ... ]
 genSelVecs gs = Set.fromList $ combinations (sum gs) $ concat $ zipWith (replicate) gs groupIDs
         where groupIDs = [0..(length gs - 1)]
--- | TODO: "uniqueify-ing" this list is the main bottlneck
+-- | "uniqueify-ing" this list is the main bottleneck
 
 insertIntoNth :: a -> Int -> [[a]] -> [[a]]
 -- | Given a value and an index n, insert the value
@@ -242,12 +239,40 @@ groupWith :: [Int] -> [a] -> [[a]]
 groupWith selVec xs = let numGroups = maximum selVec + 1
                           emptyGroups = replicate numGroups []
                           groupAssignments = zip xs selVec
-                          in DL.foldl' (flip $ uncurry insertIntoNth) emptyGroups groupAssignments
-
-{-groupWith [0, 1, 0, 0, 1] "abcde" == [ "dca", "eb" ]-}
+                          in DL.foldl' insertIntoNth' emptyGroups groupAssignments
+                      where insertIntoNth' = flip $ uncurry insertIntoNth
 
 genGroups :: Ord a => [Int] -> [a] -> [[[a]]]
 genGroups groupings xs = map ( ( flip groupWith ) xs ) selVecs
         where selVecs = Set.toList $ genSelVecs groupings
 
-main = print $ length $ genGroups [2, 3, 4] "abcdefghi"
+tryGenGroups = print $ length $ genGroups [2, 3, 4] "abcdefghi"
+
+{-problem 28-}
+lsort :: [[a]] -> [[a]]
+-- | Sort the elements of this list according to their length
+lsort = DL.sortBy (DO.comparing length)
+
+tryLsort = lsort ["abc","de","fgh","de","ijkl","mn","o"]
+
+lenFrequencies :: [[a]] -> IntMap.IntMap Int
+lenFrequencies = DL.foldl' counter IntMap.empty 
+    where counter m l = IntMap.insertWith (+) (length l) 1 m
+    {-where counter l = undefined-}
+
+tryLenFrequencies = lenFrequencies ["abc","de","fgh","de","ijkl","mn","o"]
+
+lfsort :: [[a]] -> [[a]]
+-- | Sort the elements of this list according to their length frequency
+lfsort l = let lfs = lenFrequencies l
+               lf x = IntMap.findWithDefault 0 (length x) lfs
+               in  DL.sortBy (DO.comparing lf) l
+
+tryLfsort = lfsort ["abc","de","fgh","de","ijkl","mn","o"]
+
+{-problem 31-}
+isPrime :: Int -> Bool
+isPrime = DL.and . predicates
+    where predicates x = map (not . isDivisableBy x) [2..bound x]
+          isDivisableBy x d = x `mod` d == 0
+          bound = fromEnum . sqrt . toEnum
