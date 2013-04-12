@@ -81,22 +81,22 @@ compress = foldl skipDups []
             | otherwise      = l ++ [a]
 
 {-problem 10-}
-encode :: ( Eq a ) => [a] -> [(Int, a)]
+encode :: ( Eq a ) => [a] -> [(a, Int)]
 encode = foldr countDups []
-    where countDups a [] = [(1, a)]
+    where countDups a [] = [(a, 1)]
           -- ^ countDups turns duplicate consecutive elements into
           -- a tuple with that element and count
           countDups a tuples
-            | a == b     = (n+1, b):(tail tuples)
+            | a == b     = (b, n+1):(tail tuples)
             | otherwise  = (countDups a []) ++ tuples
                 where tuple = head tuples
-                      b     = snd tuple
-                      n     = fst tuple
+                      b     = fst tuple
+                      n     = snd tuple
 
 {-problem 9-}
 pack :: Eq a => [a] -> [[a]]
 pack = ( map extend ) . encode
-    where extend (n, x) = map (\_ -> x) [1..n]
+    where extend (x, n) = map (\_ -> x) [1..n]
           -- ^ extend takes a tuple with an element and count, and
           -- converts it to a list with n elements a
 
@@ -106,7 +106,7 @@ data RunLength a = Single a | Multiple Int a
 
 encodeModified :: (Eq a) => [a] -> [ RunLength a ]
 encodeModified = map convert . encode
-    where convert (n, a)
+    where convert (a, n)
                 | n == 1    = Single a
                 | otherwise = Multiple n a
 
@@ -312,6 +312,7 @@ primes = 2 : [ x | x <- oddNumbers, isPrime x]
     where oddNumbers = [3,5..]
           isPrime x = all (doesntDivide x) $ primes `upTo` sqrt' x
 
+
 -- now define prime factors
 
 primeFactors :: Int -> [Int]
@@ -327,4 +328,7 @@ primeFactors' primes@(curPrime:largerPrimes) x =
             then curPrime : primeFactors' primes (x `quot` curPrime)
             else primeFactors' largerPrimes x
 
+{-problem 36-}
+primeFactorsMult :: Int ->  [ (Int, Int) ]
+primeFactorsMult = encode . primeFactors
 
