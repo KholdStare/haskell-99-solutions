@@ -1,3 +1,4 @@
+import qualified Data.Maybe as DM
 import qualified Data.List as DL
 import qualified Data.Ord as DO
 import qualified Data.Set as Set
@@ -268,8 +269,8 @@ lfsort l = let lfs = lenFrequencies l
 tryLfsort = lfsort ["abc","de","fgh","de","ijkl","mn","o"]
 
 {-problem 31-}
-isPrime :: Int -> Bool
-isPrime = DL.and . predicates
+isPrime' :: Int -> Bool
+isPrime' = DL.and . predicates
     where predicates x = map (not . isDivisableBy x) [2..bound x]
           isDivisableBy x d = x `mod` d == 0
           bound = fromEnum . sqrt . toEnum
@@ -305,10 +306,9 @@ upTo :: [Int] -> Int -> [Int]
 upTo list limit = takeWhile ( (>=) limit ) list
 
 primes :: [Int]
-primes = 2 : [ x | x <- oddNumbers, isPrime x]
-    where oddNumbers = [3,5..]
-          isPrime x = all (doesntDivide x) $ primes `upTo` sqrt' x
+primes = 2 : [ x | x <- [3,5..], isPrime x]
 
+isPrime x = all (doesntDivide x) $ primes `upTo` sqrt' x
 
 -- now define prime factors
 
@@ -322,8 +322,8 @@ primeFactors' :: [Int] -> Int -> [Int]
 primeFactors' _ 1 = []
 primeFactors' primes@(curPrime:largerPrimes) x =
             if curPrime `divides` x
-            then curPrime : primeFactors' primes (x `quot` curPrime)
-            else primeFactors' largerPrimes x
+                then curPrime : primeFactors' primes (x `quot` curPrime)
+                else primeFactors' largerPrimes x
 
 {-problem 36-}
 primeFactorsMult :: Int ->  [ (Int, Int) ]
@@ -341,4 +341,15 @@ totient' = product . map process . primeFactorsMult
 {-problem 39-}
 primesR l u = takeWhile ((>=) u) $ dropWhile ((>) l) primes
 
+{-problem 40-}
+goldbach x = do prime <- DL.find (isPrime . ((-) x) ) $ primes `upTo` (x `quot` 2)
+                let diff = x - prime
+                return (prime, diff)
 
+{-problem 41-}
+goldbachList l u = DM.catMaybes [ g | num <- [l..u], isEven num,
+                                      let g = goldbach num ]
+                   where isEven = divides 2
+
+goldbachList' :: Int -> Int -> Int -> [(Int, Int)]
+goldbachList' l u minPrime = filter ((<) minPrime . fst) $ goldbachList l u
