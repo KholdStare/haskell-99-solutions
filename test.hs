@@ -4,9 +4,6 @@ import qualified Data.Set as Set
 import qualified Data.IntMap.Strict as IntMap
 import System.Random
 
-fac 0 = 1
-fac x = x * fac (x - 1)
-
 {-problem 1-}
 myLast :: [a] -> a
 myLast [e] = e
@@ -331,4 +328,17 @@ primeFactors' primes@(curPrime:largerPrimes) x =
 {-problem 36-}
 primeFactorsMult :: Int ->  [ (Int, Int) ]
 primeFactorsMult = encode . primeFactors
+
+{-problem 37-}
+pow a n = pow' 1 a n
+    where pow' acc a 0 = acc
+          pow' acc a n = pow' (acc*a) a (n-1)
+
+totient' :: Int -> Int
+totient' = product . map process . primeFactorsMult
+    where process (a, n) = (a-1) * (a `pow` (n-1))
+
+{-problem 39-}
+primesR l u = takeWhile ((>=) u) $ dropWhile ((>) l) primes
+
 
