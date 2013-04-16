@@ -353,3 +353,55 @@ goldbachList l u = DM.catMaybes [ g | num <- [l..u], isEven num,
 
 goldbachList' :: Int -> Int -> Int -> [(Int, Int)]
 goldbachList' l u minPrime = filter ((<) minPrime . fst) $ goldbachList l u
+
+{-problem 46-}
+and' True True = True
+and' _    _    = False
+
+or' False False = False
+or' _     _     = True
+
+not' True = False
+not' False = True
+
+nand' a b = not' $ and' a b
+
+nor' a b = not' $ or' a b
+
+xor' True False = True
+xor' False True = True
+xor' _     _    = False
+
+impl' True False = False
+impl' _    _     = True
+
+equ' a b = not' $ xor' a b
+
+-- construct a true/false table for binary boolean function
+table :: (Bool -> Bool -> Bool) -> [[Bool]]
+table fun = do a <- [True,False]
+               b <- [True,False]
+               return [ a, b, fun a b ]
+
+-- output said table to stdio
+tableIO :: (Bool -> Bool -> Bool) -> IO ()
+tableIO = printTable . table
+
+printTable :: Show a => [[a]] -> IO ()
+printTable = putStr . unlines . map (unwords . map show)
+
+
+{-problem 47-}
+infixl 4 `or'`
+infixl 6 `and'`
+
+{-problem 48-}
+tablen :: Int -> ([Bool] -> Bool) -> [[Bool]]
+tablen n fun = do bools <- genBools n
+                  return $ bools ++ [fun bools]
+            where genBools 0 = [[]]
+                  genBools n = do b <- [True,False]
+                                  rest <- genBools (n-1)
+                                  return $ b : rest
+
+tablenIO n = printTable . tablen n 
