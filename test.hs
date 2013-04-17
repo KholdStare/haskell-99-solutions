@@ -474,3 +474,13 @@ symmetric :: Tree a -> Bool
 symmetric Empty = True
 symmetric (Branch _ l r) = symmetric' l r
 
+{-problem 57-}
+binaryInsert :: Ord a => Tree a -> a -> Tree a
+binaryInsert Empty a = treeleaf a
+binaryInsert (Branch val l r) a = 
+        if a < val
+            then Branch val (binaryInsert l a) r
+            else Branch val l (binaryInsert r a)
+
+constructBinTree :: Ord a => [a] -> Tree a
+constructBinTree = foldl binaryInsert Empty
