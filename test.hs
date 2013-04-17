@@ -428,10 +428,10 @@ union :: HuffTree a -> HuffTree a -> HuffTree a
 union h1 h2 = Node (hufffreq h1 + hufffreq h2) h1 h2
 
 huffToAlphabet' :: HuffTree a -> (Char, Char) -> String -> [ (a, String) ]
-huffToAlphabet' (Leaf _ a) _ soFar = [ (a, soFar) ]
-huffToAlphabet' (Node _ left right) alpha soFar =
-                    (huffToAlphabet' left alpha ( (fst alpha):soFar )) ++ 
-                    (huffToAlphabet' right alpha ( (snd alpha):soFar ))
+huffToAlphabet' (Leaf _ a) _ epsilon = [ (a, epsilon) ]
+huffToAlphabet' (Node _ left right) alpha@(a0, a1) epsilon =
+                    (huffToAlphabet' left alpha ( a0:epsilon )) ++ 
+                    (huffToAlphabet' right alpha ( a1:epsilon ))
 
 
 -- | Given an alphabet of symbols with their frequencies,
@@ -442,3 +442,20 @@ huffman alphabet = huffToAlphabet' (collapse huffleaves) ('0', '1') ""
           collapse [tree] = tree
           collapse (t1:t2:rest) = collapse $ DL.insertBy (DO.comparing hufffreq) (union t1 t2) rest
 
+{-problem 55-}
+data Tree a = Empty | Branch a (Tree a) (Tree a)
+              deriving (Show, Eq)
+
+treeleaf a = Branch a Empty Empty
+
+cbalTree :: Int -> [ Tree () ]
+cbalTree 0 = [ Empty ]
+cbalTree n = do ltree <- cbalTree lsize
+                rtree <- cbalTree rsize
+                let tree = Branch () ltree rtree
+                let tree2 = Branch () rtree ltree
+                if lsize == rsize
+                    then return tree
+                    else [ tree, tree2 ]
+            where lsize = (n - 1) `quot` 2
+                  rsize = n - lsize - 1
