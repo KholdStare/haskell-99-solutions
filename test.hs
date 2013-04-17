@@ -484,3 +484,6 @@ binaryInsert (Branch val l r) a =
 
 constructBinTree :: Ord a => [a] -> Tree a
 constructBinTree = foldl binaryInsert Empty
+
+{-problem 58-}
+symCbalTrees = filter symmetric . cbalTree
