@@ -405,3 +405,40 @@ tablen n fun = do bools <- genBools n
                                   return $ b : rest
 
 tablenIO n = printTable . tablen n 
+
+{-problem 49-}
+gray 0 = [ "" ]
+gray n = do symbol <- alphabet
+            rest <- gray (n-1)
+            return $ symbol : rest
+         where alphabet = [ '0', '1' ]
+            
+{-problem 50-}
+
+-- also stores the frequencies as well
+data HuffTree a = Leaf Int a | Node Int (HuffTree a) (HuffTree a)
+
+huffleaf (f, a) = Leaf f a
+
+hufffreq :: HuffTree a -> Int
+hufffreq ( Leaf f _ ) = f
+hufffreq ( Node f _ _ ) = f
+
+union :: HuffTree a -> HuffTree a -> HuffTree a
+union h1 h2 = Node (hufffreq h1 + hufffreq h2) h1 h2
+
+huffToAlphabet' :: HuffTree a -> (Char, Char) -> String -> [ (a, String) ]
+huffToAlphabet' (Leaf _ a) _ soFar = [ (a, soFar) ]
+huffToAlphabet' (Node _ left right) alpha soFar =
+                    (huffToAlphabet' left alpha ( (fst alpha):soFar )) ++ 
+                    (huffToAlphabet' right alpha ( (snd alpha):soFar ))
+
+
+-- | Given an alphabet of symbols with their frequencies,
+-- construct the huffman encoding of such an alphabet
+huffman :: [ (Int, a) ] -> [ (a, String) ]
+huffman alphabet = huffToAlphabet' (collapse huffleaves) ('0', '1') ""
+    where huffleaves = map huffleaf $ DL.sortBy (DO.comparing fst) alphabet
+          collapse [tree] = tree
+          collapse (t1:t2:rest) = collapse $ DL.insertBy (DO.comparing hufffreq) (union t1 t2) rest
+
