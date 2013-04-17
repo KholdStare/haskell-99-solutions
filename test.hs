@@ -459,3 +459,18 @@ cbalTree n = do ltree <- cbalTree lsize
                     else [ tree, tree2 ]
             where lsize = (n - 1) `quot` 2
                   rsize = n - lsize - 1
+
+{-problem 56-}
+
+-- checks if two trees are mirrors of each other
+-- structurally
+symmetric' :: Tree a -> Tree a -> Bool
+symmetric' Empty Empty = True
+symmetric' (Branch _ l1 r1) (Branch _ l2 r2) =
+                (symmetric' l1 r2) && (symmetric' r1 l2)
+symmetric' _ _ = False
+
+symmetric :: Tree a -> Bool
+symmetric Empty = True
+symmetric (Branch _ l r) = symmetric' l r
+
