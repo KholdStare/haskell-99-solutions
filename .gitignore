@@ -1,0 +1,9 @@
+
+# swap files
+.*.swp
+
+# intermediates
+*.out
+*.hi
+*.o
+*.prof
