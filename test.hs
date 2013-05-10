@@ -64,14 +64,16 @@ symCbalTrees = filter symmetric . cbalTree
 
 {-problem 59-}
 hbalTree :: Int -> [ Tree () ]
-hbalTree 0 = [ Empty ]
-hbalTree n = do treeSameHeight1 <- cbalTree (n-1)
-                treeSameHeight2 <- cbalTree (n-1)
-                treeSmallHeight <- cbalTree (n-2)
-                let unbalanced = [ Branch () treeSameHeight1 treeSmallHeight,
-                                   Branch () treeSmallHeight treeSameHeight1 ] 
-                let balanced = [ Branch () treeSameHeight1 treeSameHeight2 ]
-                unbalanced ++ balanced
+hbalTree n
+    | n <= 0 = [ Empty ]
+    | otherwise = balanced ++ unbalanced
+            where balanced = do treeSameHeight1 <- hbalTree (n-1)
+                                treeSameHeight2 <- hbalTree (n-1)
+                                return $ Branch () treeSameHeight1 treeSameHeight2
+                  unbalanced = do treeSameHeight  <- hbalTree (n-1)
+                                  treeSmallHeight <- hbalTree (n-2)
+                                  [ Branch () treeSameHeight treeSmallHeight,
+                                    Branch () treeSmallHeight treeSameHeight ] 
 
 -- | Inserts a given value after each element in a list
 alternateWith :: a -> [a] -> [a]
