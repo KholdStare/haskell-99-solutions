@@ -1,27 +1,16 @@
 import qualified Data.List as DL
+import qualified Data.Foldable as DF
+import qualified Data.Monoid as DM
 
 import Problems1_10
 import Problems11_20
 import Problems21_30
 import Problems31_40
 import Problems41_50
+import Tree
 
 
 {-problem 55-}
-data Tree a = Empty | Branch a (Tree a) (Tree a)
-              deriving Eq
-
-instance Show a => Show (Tree a) where
-    show t = unlines $ show' t 0
-        where show' (Empty) indent = []
-              show' (Branch val l r) indent = right ++ self ++ left
-                        where right = show' r (indent+1)
-                              self = [ replicate indent '\t' ++ (show val) ]
-                              left = show' l (indent+1)
-
-
-treeleaf a = Branch a Empty Empty
-
 cbalTree :: Int -> [ Tree () ]
 cbalTree 0 = [ Empty ]
 cbalTree n = do ltree <- cbalTree lsize
@@ -63,6 +52,7 @@ constructBinTree = foldl binaryInsert Empty
 symCbalTrees = filter symmetric . cbalTree
 
 {-problem 59-}
+-- TODO test
 hbalTree :: Int -> [ Tree () ]
 hbalTree n
     | n <= 0 = [ Empty ]
@@ -76,6 +66,27 @@ hbalTree n
                                     Branch () treeSmallHeight treeSameHeight ] 
 
 -- | Inserts a given value after each element in a list
+-- good for printing a list of multi-line strings with separators
 alternateWith :: a -> [a] -> [a]
 alternateWith a [] = []
 alternateWith a (x:xs) = x:a:alternateWith a xs
+
+
+{-problem 60-}
+
+-- | Given a height, find the minimum number of
+-- nodes required to construct a height-balanced tree
+-- of that height.
+hbalMinNodes :: Int -> Int
+-- TODO: is wrong
+-- TODO: quickcheck: construct all hbal trees of a certain height
+-- and verify the minimum against this function
+hbalMinNodes 0 = 0
+hbalMinNodes 1 = 1
+hbalMinNodes h = hbalMinNodes (h-1) + hbalMinNodes (h-2) + 1
+
+-- | Given number of nodes N, return the height of the
+-- tallest height-balanced tree that can be constructed
+-- with N nodes.
+hbalMaxHeight :: Int -> Int
+hbalMaxHeight n = undefined
