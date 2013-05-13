@@ -1,6 +1,4 @@
 import qualified Data.List as DL
-import qualified Data.Foldable as DF
-import qualified Data.Monoid as DM
 
 import Problems1_10
 import Problems11_20
@@ -73,7 +71,6 @@ alternateWith a (x:xs) = x:a:alternateWith a xs
 
 
 {-problem 60-}
-
 -- | Given a height, find the minimum number of
 -- nodes required to construct a height-balanced tree
 -- of that height.
