@@ -1,22 +1,29 @@
 module Tree
     ( Tree(..)
     , NodeInfo(..)
-    , treeleaf
+    , leaf
     , toNodeInfo
     , arbitrary
     , shrink
     , coarbitrary
+    -- helpers
+    , intersperse
     )
 where
 
 import Data.Foldable
+import Data.Function
 import Data.Monoid
+import Data.List (sortBy, groupBy)
+import Data.Ord
 import Control.Monad
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
 
 data Tree a = Empty | Branch a (Tree a) (Tree a)
               deriving Eq
+
+leaf a = Branch a Empty Empty
 
 -- | Generates an arbitrary tree with a specified number of nodes
 genSizedTree :: Arbitrary a => Int -> Gen (Tree a)
@@ -44,7 +51,9 @@ data NodeInfo a = NodeInfo { value :: a
                            , depth :: Int  
                            } deriving (Show)
 
-toNodeInfo :: Tree a -> ([NodeInfo a], Int) -- modeinfo list, next index
+-- | Convert tree into in-order tranversal list of values
+-- along with the index/depth of the nodes
+toNodeInfo :: Tree a -> ([NodeInfo a], Int) -- nodeinfo list, next index
 toNodeInfo t = toNodeInfo' t 0 0
          where toNodeInfo' Empty index _ = ([], index)
                toNodeInfo' (Branch a l r) index depth = 
@@ -54,8 +63,21 @@ toNodeInfo t = toNodeInfo' t 0 0
                                  (rightList, lastIndex) = toNodeInfo' l (leftIndex+1) (depth+1)
                                  completeList = leftList ++ thisNodeInfo:rightList
 
+intersperse :: a -> [(Int, a)] -> [a]
+intersperse filler = intersperse' 0 filler . sortBy (comparing fst)
+        where intersperse' _ _ [] = []
+              intersperse' i filler all@((index, val):rest) =
+                         if i == index
+                            then val:intersperse' (i) filler rest
+                            else filler:intersperse'     (i+1) filler all
+
+
 -- TODO: rotate it
 instance Show a => Show (Tree a) where
+    {-show t = unlines $ linesByDepth-}
+        {-where nodesSortedByDepth = sortBy (comparing depth `thenComparing` index) $ fst $ toNodeInfo t-}
+              {-nodesPerDepth      = groupBy ((==) `on` depth) nodesSortedByDepth-}
+              {-linesByDepth = undefined-}
     show t = unlines $ show' t 0
         where show' (Empty) indent = []
               show' (Branch val l r) indent = right ++ self ++ left
@@ -67,9 +89,17 @@ instance Foldable Tree where
     foldMap f Empty = mempty
     foldMap f (Branch a l r) = foldMap f l `mappend` f a `mappend` foldMap f r
 
-treeleaf a = Branch a Empty Empty
-
 -- | Count the number of nodes in a tree
 countNodes :: Tree a -> Int
 countNodes = getSum . foldMap (\_ -> Sum 1)
 
+-- Ord Helpers
+
+-- Use as an infix operator
+thenComparing :: (Ord b) => (a -> a -> Ordering)
+                         -> (a -> b) -- property of a to compare with
+                         -> (a -> a -> Ordering)
+thenComparing comparator property a1 a2 =
+         case comparator a1 a2 of
+              EQ -> compare (property a1) (property a2)
+              otherwise -> otherwise
