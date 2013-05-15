@@ -45,13 +45,13 @@ instance Arbitrary SmallNat where
     shrink = map SmallNat . shrink . getSmallNat
 
 prop_intersperse_length :: [ (SmallNat, ()) ] -> Bool
-prop_intersperse_length l = (length $ intersperse () input) == expectedLength
+prop_intersperse_length l = length (intersperse () input) == expectedLength
         where extract (n, s) = (getSmallNat n, s)
               input = map extract l
               inputLength = length input
               expectedLength = if inputLength == 0
                                   then 0
-                                  else (maximum $ map fst $ input) + inputLength
+                                  else maximum (map fst input) + inputLength
 
 -- max is 4
 data ReallySmallNat = ReallySmallNat { getReallySmallNat :: Int } deriving (Show)
@@ -61,7 +61,7 @@ instance Arbitrary ReallySmallNat where
     shrink = map ReallySmallNat . shrink . getReallySmallNat
 
 prop_hbalTree_noDups :: ReallySmallNat -> Bool
-prop_hbalTree_noDups h = length trees == (length $ nub trees)
+prop_hbalTree_noDups h = length trees == length (nub trees)
         where trees = hbalTree $ getReallySmallNat h
 
 -- TODO make size configurable per test? Also num of tests?
@@ -72,6 +72,6 @@ prop_hbalTree_depth h = all (== n) $ map treeDepth trees
 
 -- could use 5 here?
 prop_hbalMinNodes_nodeCount :: ReallySmallNat -> Bool
-prop_hbalMinNodes_nodeCount h = (minimum $ map countNodes trees) == hbalMinNodes height
+prop_hbalMinNodes_nodeCount h = minimum (map countNodes trees) == hbalMinNodes height
         where height = getReallySmallNat h
               trees = hbalTree height

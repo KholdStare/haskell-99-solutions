@@ -55,7 +55,7 @@ isPalindrome'' = duplicate $ (==) . reverse
     where duplicate f a = f a a
 
 isPalindrome''' ::  Eq a => [a] -> Bool
-isPalindrome''' xs = foldl (&&) True (zipWith (==) xs $ myReverse xs) 
+isPalindrome''' xs = and (zipWith (==) xs $ myReverse xs) 
 
 {-problem 7-}
 data NestedList a = Elem a | List [NestedList a]
@@ -89,6 +89,6 @@ encode = foldr countDups []
 {-problem 9-}
 pack :: Eq a => [a] -> [[a]]
 pack = ( map extend ) . encode
-    where extend (x, n) = map (\_ -> x) [1..n]
+    where extend (x, n) = map (const x) [1..n]
           -- ^ extend takes a tuple with an element and count, and
           -- converts it to a list with n elements a
