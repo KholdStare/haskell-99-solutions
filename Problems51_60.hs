@@ -1,4 +1,8 @@
-module Problems51_60 ( hbalTree ) where
+module Problems51_60
+    ( hbalTree
+    , hbalMinNodes
+    )
+where
 
 import Tree
 
@@ -70,9 +74,6 @@ alternateWith a (x:xs) = x:a:alternateWith a xs
 -- nodes required to construct a height-balanced tree
 -- of that height.
 hbalMinNodes :: Int -> Int
--- TODO: is wrong
--- TODO: quickcheck: construct all hbal trees of a certain height
--- and verify the minimum against this function
 hbalMinNodes 0 = 0
 hbalMinNodes 1 = 1
 hbalMinNodes h = hbalMinNodes (h-1) + hbalMinNodes (h-2) + 1

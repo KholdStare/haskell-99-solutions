@@ -25,6 +25,10 @@ tests = [
         testGroup "Problem 59" [
                 testProperty "no duplicates" prop_hbalTree_noDups,
                 testProperty "correct depth" prop_hbalTree_depth
+                -- TODO add more
+            ],
+        testGroup "Problem 60" [
+                testProperty "min nodes" prop_hbalMinNodes_nodeCount
             ]
     ]
 
@@ -65,3 +69,9 @@ prop_hbalTree_depth :: ReallySmallNat -> Bool
 prop_hbalTree_depth h = all (== n) $ map treeDepth trees
         where trees = hbalTree n
               n = getReallySmallNat h
+
+-- could use 5 here?
+prop_hbalMinNodes_nodeCount :: ReallySmallNat -> Bool
+prop_hbalMinNodes_nodeCount h = (minimum $ map countNodes trees) == hbalMinNodes height
+        where height = getReallySmallNat h
+              trees = hbalTree height
