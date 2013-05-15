@@ -1,4 +1,12 @@
-module Problems1_10 ( encode, myReverse, myLength ) where
+module Problems1_10
+    ( encode
+    , myReverse
+    , myLength
+    , isPalindrome
+    , isPalindrome'
+    , isPalindrome''
+    , isPalindrome'''
+    ) where
 
 {-problem 1-}
 myLast :: [a] -> a

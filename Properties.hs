@@ -11,6 +11,7 @@ import Data.List (nub)
 
 import Test.QuickCheck
 
+import Problems1_10
 import Problems51_60
 import Tree
 
@@ -20,6 +21,17 @@ tests = [
         testGroup "NodeInfo" [
                 testProperty "increasing indeces" prop_toNodeInfo_increasingIndex,
                 testProperty "intersperse size" prop_intersperse_length
+            ],
+        testGroup "Problem 5 - reverse" [
+                testProperty "concatenate" prop_reverse_concat
+                -- TODO add more
+            ],
+        testGroup "Problem 6 - isPalindrome" [
+                testProperty "impl 1" $ prop_isPalindrome_test isPalindrome,
+                testProperty "impl 2" $ prop_isPalindrome_test isPalindrome',
+                testProperty "impl 3" $ prop_isPalindrome_test isPalindrome'',
+                testProperty "impl 4" $ prop_isPalindrome_test isPalindrome'''
+                -- TODO add more
             ],
         -- TODO: add tests for some problems
         testGroup "Problem 59" [
@@ -31,6 +43,21 @@ tests = [
                 testProperty "min nodes" prop_hbalMinNodes_nodeCount
             ]
     ]
+
+-- Problems 1 - 10
+type TestList = [Int]
+
+prop_reverse_concat :: TestList -> TestList -> Bool
+prop_reverse_concat xs ys = (myReverse xs) ++ (myReverse ys) ==
+                         (myReverse (ys ++ xs))
+
+prop_isPalindrome_test :: (TestList -> Bool) -> TestList -> Bool
+prop_isPalindrome_test impl list = impl evenDrome && impl oddDrome
+                        where revlist = reverse list
+                              evenDrome = list ++ revlist
+                              oddDrome  = list ++ 0:revlist -- add an element in the middle
+
+-- Problems 51 - 60
 
 prop_toNodeInfo_increasingIndex :: Tree () -> Bool
 prop_toNodeInfo_increasingIndex =
@@ -75,3 +102,4 @@ prop_hbalMinNodes_nodeCount :: ReallySmallNat -> Bool
 prop_hbalMinNodes_nodeCount h = minimum (map countNodes trees) == hbalMinNodes height
         where height = getReallySmallNat h
               trees = hbalTree height
+
