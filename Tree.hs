@@ -6,12 +6,14 @@ module Tree
     , arbitrary
     , shrink
     , coarbitrary
+    , countNodes
+    , treeDepth
     -- helpers
     , intersperse
     )
 where
 
-import Data.Foldable
+import Data.Foldable (Foldable, foldMap)
 import Data.Function
 import Data.Monoid
 import Data.List (sortBy, groupBy)
@@ -23,6 +25,7 @@ import Test.QuickCheck.Gen
 data Tree a = Empty | Branch a (Tree a) (Tree a)
               deriving Eq
 
+leaf :: a -> Tree a
 leaf a = Branch a Empty Empty
 
 -- | Generates an arbitrary tree with a specified number of nodes
@@ -41,7 +44,7 @@ instance Arbitrary a => Arbitrary (Tree a) where
                                [ (Branch a leftShrink r),
                                  (Branch a l rightShrink) ]
                             where adjust [] = [Empty] -- always have at least one "Empty"
-                                  adjust l  = l
+                                  adjust lst = lst
 
 instance CoArbitrary (Tree a) where
     coarbitrary t gen = variant (countNodes t) gen
@@ -55,10 +58,10 @@ data NodeInfo a = NodeInfo { value :: a
 -- along with the index/depth of the nodes
 toNodeInfo :: Tree a -> ([NodeInfo a], Int) -- nodeinfo list, next index
 toNodeInfo t = toNodeInfo' t 0 0
-         where toNodeInfo' Empty index _ = ([], index)
-               toNodeInfo' (Branch a l r) index depth = 
+         where toNodeInfo' Empty ind _ = ([], ind)
+               toNodeInfo' (Branch a l r) ind depth = 
                            (completeList, lastIndex)
-                           where (leftList, leftIndex) = toNodeInfo' l index (depth+1)
+                           where (leftList, leftIndex) = toNodeInfo' l ind (depth+1)
                                  thisNodeInfo = (NodeInfo a (leftIndex) depth)
                                  (rightList, lastIndex) = toNodeInfo' l (leftIndex+1) (depth+1)
                                  completeList = leftList ++ thisNodeInfo:rightList
@@ -71,8 +74,6 @@ intersperse filler = intersperse' 0 filler . sortBy (comparing fst)
                             then val:intersperse' (i) filler rest
                             else filler:intersperse'     (i+1) filler all
 
-
--- TODO: rotate it
 instance Show a => Show (Tree a) where
     show Empty = "Empty"
     show t = unlines $ linesByDepth
@@ -88,6 +89,11 @@ instance Foldable Tree where
 -- | Count the number of nodes in a tree
 countNodes :: Tree a -> Int
 countNodes = getSum . foldMap (\_ -> Sum 1)
+
+-- | Count the number of nodes in a tree
+treeDepth :: Tree a -> Int
+treeDepth Empty = 0
+treeDepth (Branch _ l r) = max (treeDepth l) (treeDepth r) + 1
 
 -- Ord Helpers
 
