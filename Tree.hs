@@ -74,16 +74,12 @@ intersperse filler = intersperse' 0 filler . sortBy (comparing fst)
 
 -- TODO: rotate it
 instance Show a => Show (Tree a) where
-    {-show t = unlines $ linesByDepth-}
-        {-where nodesSortedByDepth = sortBy (comparing depth `thenComparing` index) $ fst $ toNodeInfo t-}
-              {-nodesPerDepth      = groupBy ((==) `on` depth) nodesSortedByDepth-}
-              {-linesByDepth = undefined-}
-    show t = unlines $ show' t 0
-        where show' (Empty) indent = []
-              show' (Branch val l r) indent = right ++ self ++ left
-                        where right = show' r (indent+1)
-                              self = [ replicate indent '\t' ++ (show val) ]
-                              left = show' l (indent+1)
+    show Empty = "Empty"
+    show t = unlines $ linesByDepth
+        where nodesSortedByDepth = sortBy (comparing depth `thenComparing` index) $ fst $ toNodeInfo t
+              nodesPerDepth      = groupBy ((==) `on` depth) nodesSortedByDepth -- :: [[NodeInfo]]
+              linesByDepth = map rowToString nodesPerDepth
+              rowToString = concat . intersperse "\t" . map (\nodeinfo -> (index nodeinfo, show $ value nodeinfo))
 
 instance Foldable Tree where
     foldMap f Empty = mempty
