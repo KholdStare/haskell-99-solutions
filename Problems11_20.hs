@@ -1,4 +1,10 @@
-module Problems11_20 ( removeAt ) where
+module Problems11_20
+    ( removeAt
+    , dupli
+    , repli
+    , dropNth
+    , dropNth''
+    ) where
 
 import Problems1_10
 

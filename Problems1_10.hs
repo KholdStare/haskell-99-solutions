@@ -1,5 +1,6 @@
 module Problems1_10
     ( encode
+    , compress
     , myReverse
     , myLength
     , isPalindrome
@@ -7,6 +8,8 @@ module Problems1_10
     , isPalindrome''
     , isPalindrome'''
     ) where
+
+import Data.List
 
 {-problem 1-}
 myLast :: [a] -> a
@@ -75,11 +78,11 @@ flatten ( List (x:xs) ) = ( flatten x ) ++ flatten (List xs)
 
 {-problem 8-}
 compress :: Eq a => [a] -> [a]
-compress = foldl skipDups []
+compress = reverse . foldl' skipDups []
     where skipDups [] a = [a]
           skipDups l a
-            | (last l) == a  = l
-            | otherwise      = l ++ [a]
+            | (head l) == a  = l
+            | otherwise      = a:l
 
 {-problem 10-}
 encode :: ( Eq a ) => [a] -> [(a, Int)]
