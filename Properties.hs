@@ -12,26 +12,47 @@ import Data.List (nub)
 import Test.QuickCheck
 
 import Problems1_10
+import Problems11_20
 import Problems51_60
 import Tree
 
 main = defaultMain tests
 
 tests = [
+        -- TODO look into unit tests?
+        testGroup "Helpers" [
+                testProperty "keepNth" prop_keepNth_length
+            ],
         testGroup "NodeInfo" [
                 testProperty "increasing indeces" prop_toNodeInfo_increasingIndex,
                 testProperty "intersperse size" prop_intersperse_length
             ],
         testGroup "Problem 5 - reverse" [
-                testProperty "concatenate" prop_reverse_concat
-                -- TODO add more
+                testProperty "concatenate" prop_reverse_concat -- TODO rename
             ],
         testGroup "Problem 6 - isPalindrome" [
                 testProperty "impl 1" $ prop_isPalindrome_test isPalindrome,
                 testProperty "impl 2" $ prop_isPalindrome_test isPalindrome',
                 testProperty "impl 3" $ prop_isPalindrome_test isPalindrome'',
                 testProperty "impl 4" $ prop_isPalindrome_test isPalindrome'''
-                -- TODO add more
+            ],
+        testGroup "Problem 8 - compress" [
+                testProperty "length doesn't get longer" prop_compress_length,
+                testProperty "correct order" prop_compress_firstLast
+            ],
+        testGroup "Problem 10 - encode (runLength)" [
+                testProperty "counts add up to length" prop_encode_count 
+            ],
+        testGroup "Problem 14 - duplicate list elements" [
+                testProperty "length doubles" prop_dupli_length,
+                testProperty "every second val matches original" prop_dupli_dropNth
+            ],
+        testGroup "Problem 15 - replicate list elements" [
+                testProperty "length increases" prop_repli_length,
+                testProperty "every nth val matches original" prop_repli_dropNth
+            ],
+        testGroup "Problem 16 - dropNth value from list" [
+                testProperty "length decreases" prop_dropNth_length
             ],
         -- TODO: add tests for some problems
         testGroup "Problem 59" [
@@ -43,6 +64,29 @@ tests = [
                 testProperty "min nodes" prop_hbalMinNodes_nodeCount
             ]
     ]
+
+-- Helper types
+
+data SmallNat = SmallNat { getSmallNat :: Int } deriving (Show)
+
+instance Arbitrary SmallNat where
+    arbitrary = liftM SmallNat $ choose (0, 100)
+    shrink = map SmallNat . shrink . getSmallNat
+
+-- Helper functions
+
+keepNth :: Int -> [a] -> [a]
+keepNth n = reverse . keepNth' (n-1) (n-1) []
+        where keepNth' _ _ acc []     = acc
+              keepNth' 0 n acc (x:xs) = keepNth' n     n (x:acc) xs
+              keepNth' i n acc (x:xs) = keepNth' (i-1) n    acc  xs
+
+prop_keepNth_length :: TestList -> SmallNat -> Bool
+prop_keepNth_length list num = dropLen * n >= origLen - n &&
+                               dropLen * n <= origLen
+               where n       = 1 + (getSmallNat num) -- always > 0
+                     origLen = length list
+                     dropLen = length (keepNth n list)
 
 -- Problems 1 - 10
 type TestList = [Int]
@@ -57,6 +101,42 @@ prop_isPalindrome_test impl list = impl evenDrome && impl oddDrome
                               evenDrome = list ++ revlist
                               oddDrome  = list ++ 0:revlist -- add an element in the middle
 
+prop_compress_length :: TestList -> Bool
+prop_compress_length l = length (compress l) <= length l
+
+prop_compress_firstLast :: TestList -> Bool
+prop_compress_firstLast [] = True
+prop_compress_firstLast [x] = True
+prop_compress_firstLast l = head compl == head l &&
+                        last compl == last l
+        where compl = compress l
+
+prop_encode_count :: TestList -> Bool
+prop_encode_count l = length l == (sum $ map snd $ encode l)
+
+-- Problems 11 - 20
+
+prop_dupli_length :: TestList -> Bool
+prop_dupli_length l = 2 * (length l) == length (dupli l)
+
+prop_dupli_dropNth :: TestList -> Bool
+prop_dupli_dropNth list = keepNth 2 (dupli list) == list
+
+prop_repli_length :: TestList -> SmallNat -> Bool
+prop_repli_length list num = n * (length list) == length (repli list n)
+                   where n = 1 + (getSmallNat num) -- always > 0
+
+prop_repli_dropNth :: TestList -> SmallNat -> Bool
+prop_repli_dropNth list num = keepNth n (repli list n) == list
+                    where n = 1 + (getSmallNat num) -- always > 0
+
+prop_dropNth_length :: TestList -> SmallNat -> Bool
+prop_dropNth_length list num = origLen < n ||
+                               ( dropLen * n >= origLen * (n-1) - n &&
+                                 dropLen * n <= origLen * (n-1) )
+               where n       = 1 + (getSmallNat num) -- always > 0
+                     origLen = length list
+                     dropLen = length (dropNth list n)
 -- Problems 51 - 60
 
 prop_toNodeInfo_increasingIndex :: Tree () -> Bool
@@ -64,12 +144,6 @@ prop_toNodeInfo_increasingIndex =
     areConsecutiveNumbers . getIndeces . toNodeInfo
     where getIndeces = map index . fst
           areConsecutiveNumbers = all (uncurry (==)) . zip [0..]
-
-data SmallNat = SmallNat { getSmallNat :: Int } deriving (Show)
-
-instance Arbitrary SmallNat where
-    arbitrary = liftM SmallNat $ choose (0, 100)
-    shrink = map SmallNat . shrink . getSmallNat
 
 prop_intersperse_length :: [ (SmallNat, ()) ] -> Bool
 prop_intersperse_length l = length (intersperse () input) == expectedLength
