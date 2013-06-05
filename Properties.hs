@@ -132,8 +132,8 @@ prop_repli_dropNth list num = keepNth n (repli list n) == list
 
 prop_dropNth_length :: TestList -> SmallNat -> Bool
 prop_dropNth_length list num = origLen < n ||
-                               ( dropLen * n >= origLen * (n-1) - n &&
-                                 dropLen * n <= origLen * (n-1) )
+                               ( dropLen * n > origLen * (n-1) - n &&
+                                 dropLen * n < origLen * (n-1) + n )
                where n       = 1 + (getSmallNat num) -- always > 0
                      origLen = length list
                      dropLen = length (dropNth list n)
