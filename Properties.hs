@@ -43,6 +43,10 @@ tests = [
         testGroup "Problem 10 - encode (runLength)" [
                 testProperty "counts add up to length" prop_encode_count 
             ],
+        testGroup "Problem 11-13 - encode/decode runlength modified" [
+                testProperty "identity" prop_encode_decode_modified,
+                testProperty "both encode functions match" prop_encode_modified_direct
+            ],
         testGroup "Problem 14 - duplicate list elements" [
                 testProperty "length doubles" prop_dupli_length,
                 testProperty "every second val matches original" prop_dupli_dropNth
@@ -115,6 +119,12 @@ prop_encode_count :: TestList -> Bool
 prop_encode_count l = length l == (sum $ map snd $ encode l)
 
 -- Problems 11 - 20
+
+prop_encode_decode_modified :: String -> Bool
+prop_encode_decode_modified s = decodeModified (encodeModified s) == s
+
+prop_encode_modified_direct :: String -> Bool
+prop_encode_modified_direct s = (encodeDirect s) == (encodeModified s)
 
 prop_dupli_length :: TestList -> Bool
 prop_dupli_length l = 2 * (length l) == length (dupli l)

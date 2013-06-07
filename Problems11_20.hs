@@ -1,5 +1,8 @@
 module Problems11_20
     ( removeAt
+    , encodeModified
+    , encodeDirect
+    , decodeModified
     , dupli
     , repli
     , dropNth
@@ -12,7 +15,7 @@ import qualified Data.List as DL
 
 {-problem 11-}
 data RunLength a = Single a | Multiple Int a
-    deriving Show
+    deriving (Show, Eq)
 
 encodeModified :: (Eq a) => [a] -> [ RunLength a ]
 encodeModified = map convert . encode
@@ -23,8 +26,7 @@ encodeModified = map convert . encode
 {-problem 12-}
 decodeModified :: [ RunLength a ] -> [a]
 -- | Realized that "foldl (++) [] . map" is concatMap,
--- | but will keep it because it looks sophisticated :P
-decodeModified = DL.foldl' (++) [] . map expand
+decodeModified = concatMap expand
     where expand ( Single a )     = [a]
           expand ( Multiple n a ) = replicate n a
 
@@ -34,7 +36,7 @@ encodeDirect = map simplify . foldr countDups []
     where countDups a [] = [Multiple 1 a]
           countDups a acc
             | a == b     = (Multiple (n+1) b):(tail acc)
-            | otherwise  = (countDups a []) ++ acc
+            | otherwise  = (Multiple 1 a):acc
                 where Multiple n b = head acc
           simplify ( Multiple 1 a ) = Single a
           simplify a = a
