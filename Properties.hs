@@ -56,7 +56,8 @@ tests = [
                 testProperty "every nth val matches original" prop_repli_dropNth
             ],
         testGroup "Problem 16 - dropNth value from list" [
-                testProperty "length decreases" prop_dropNth_length
+                testProperty "length decreases" (prop_dropNth_length dropNth),
+                testProperty "length decreases''" (prop_dropNth_length dropNth'')
             ],
         -- TODO: add tests for some problems
         testGroup "Problem 59" [
@@ -140,13 +141,14 @@ prop_repli_dropNth :: TestList -> SmallNat -> Bool
 prop_repli_dropNth list num = keepNth n (repli list n) == list
                     where n = 1 + (getSmallNat num) -- always > 0
 
-prop_dropNth_length :: TestList -> SmallNat -> Bool
-prop_dropNth_length list num = origLen < n ||
-                               ( dropLen * n > origLen * (n-1) - n &&
-                                 dropLen * n < origLen * (n-1) + n )
-               where n       = 1 + (getSmallNat num) -- always > 0
-                     origLen = length list
-                     dropLen = length (dropNth list n)
+-- take implementation to test as first param
+prop_dropNth_length :: ([Int] -> Int -> [Int]) -> TestList -> SmallNat -> Bool
+prop_dropNth_length fun list num = origLen < n ||
+                                   ( dropLen * n > origLen * (n-1) - n &&
+                                     dropLen * n < origLen * (n-1) + n )
+                   where n       = 1 + (getSmallNat num) -- always > 0
+                         origLen = length list
+                         dropLen = length (fun list n)
 -- Problems 51 - 60
 
 prop_toNodeInfo_increasingIndex :: Tree () -> Bool
