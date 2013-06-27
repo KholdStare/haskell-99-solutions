@@ -59,6 +59,9 @@ tests = [
                 testProperty "length decreases" (prop_dropNth_length dropNth),
                 testProperty "length decreases''" (prop_dropNth_length dropNth'')
             ],
+        testGroup "Problem 17 - split" [
+                testProperty "concatenates to same string" prop_split_concat
+            ],
         -- TODO: add tests for some problems
         testGroup "Problem 59" [
                 testProperty "no duplicates" prop_hbalTree_noDups,
@@ -149,6 +152,11 @@ prop_dropNth_length fun list num = origLen < n ||
                    where n       = 1 + (getSmallNat num) -- always > 0
                          origLen = length list
                          dropLen = length (fun list n)
+
+prop_split_concat :: TestList -> Bool
+prop_split_concat l = (uncurry (++)) (split l middle) == l
+            where middle = length l `div` 2
+
 -- Problems 51 - 60
 
 prop_toNodeInfo_increasingIndex :: Tree () -> Bool

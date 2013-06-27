@@ -5,6 +5,7 @@ module Problems11_20
     , decodeModified
     , dupli
     , repli
+    , split
     , dropNth
     , dropNth''
     ) where
@@ -76,7 +77,7 @@ slice l start end = drop (start-1) $ take end l
 {-problem 19-}
 rotate ::  [a] -> Int -> [a]
 rotate l n = uncurry ( flip (++) ) $ splitAt index l 
-    where index = mod n (length l)
+    where index = n `mod` (length l)
 
 {-problem 20-}
 -- | zero-indexed version.

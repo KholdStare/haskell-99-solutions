@@ -1,4 +1,8 @@
-module Problems21_30 ( removeAt ) where
+module Problems21_30
+    ( insertAt
+    , range
+    )
+where
 
 import System.Random
 import qualified Data.List as DL
