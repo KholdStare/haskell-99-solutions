@@ -64,24 +64,28 @@ tests = [
             ],
         -- TODO: add tests for some problems
         testGroup "Problem 59" [
-                testProperty "no duplicates" prop_hbalTree_noDups,
-                testProperty "correct depth" prop_hbalTree_depth
+                testProperty "no duplicates" $ forAllNaturalsUpTo 4 prop_hbalTree_noDups,
+                testProperty "correct depth" $ forAllNaturalsUpTo 4 prop_hbalTree_depth
                 -- TODO add more
             ],
         testGroup "Problem 60" [
-                testProperty "min nodes" prop_hbalMinNodes_nodeCount
+                testProperty "min nodes" $ forAllNaturalsUpTo 5 prop_hbalMinNodes_nodeCount
             ]
     ]
 
 -- Helper types
 
-data SmallNat = SmallNat { getSmallNat :: Int } deriving (Show)
+newtype SmallNat = SmallNat { getSmallNat :: Int }
+    deriving Show
 
 instance Arbitrary SmallNat where
     arbitrary = liftM SmallNat $ choose (0, 100)
     shrink = map SmallNat . shrink . getSmallNat
 
 -- Helper functions
+
+-- Restricts properties to a range in naturals
+forAllNaturalsUpTo n = forAll (choose (0,n))
 
 keepNth :: Int -> [a] -> [a]
 keepNth n = reverse . keepNth' (n-1) (n-1) []
@@ -181,19 +185,16 @@ instance Arbitrary ReallySmallNat where
     arbitrary = liftM ReallySmallNat $ choose (0, 4)
     shrink = map ReallySmallNat . shrink . getReallySmallNat
 
-prop_hbalTree_noDups :: ReallySmallNat -> Bool
+prop_hbalTree_noDups :: Int -> Bool
 prop_hbalTree_noDups h = length trees == length (nub trees)
-        where trees = hbalTree $ getReallySmallNat h
+        where trees = hbalTree h
 
--- TODO make size configurable per test? Also num of tests?
-prop_hbalTree_depth :: ReallySmallNat -> Bool
-prop_hbalTree_depth h = all (== n) $ map treeDepth trees
-        where trees = hbalTree n
-              n = getReallySmallNat h
+prop_hbalTree_depth :: Int -> Bool
+prop_hbalTree_depth h = all (== h) $ map treeDepth trees
+        where trees = hbalTree h
 
 -- could use 5 here?
-prop_hbalMinNodes_nodeCount :: ReallySmallNat -> Bool
-prop_hbalMinNodes_nodeCount h = minimum (map countNodes trees) == hbalMinNodes height
-        where height = getReallySmallNat h
-              trees = hbalTree height
+prop_hbalMinNodes_nodeCount :: Int -> Bool
+prop_hbalMinNodes_nodeCount height = minimum (map countNodes trees) == hbalMinNodes height
+        where trees = hbalTree height
 
