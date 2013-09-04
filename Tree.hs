@@ -16,17 +16,25 @@ where
 import Data.Foldable (Foldable, foldMap)
 import Data.Function
 import Data.Monoid
+import Data.Maybe
 import Data.List (sortBy, groupBy)
 import Data.Ord
 import Control.Monad
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
+import qualified Data.Tree as DT
 
 data Tree a = Empty | Branch a (Tree a) (Tree a)
               deriving Eq
 
 leaf :: a -> Tree a
 leaf a = Branch a Empty Empty
+
+toRoseTree :: Tree a -> Maybe (DT.Tree a)
+toRoseTree Empty = Nothing
+toRoseTree (Branch a l r) = Just $ DT.Node a leaves
+    where leaves = catMaybes $ map toRoseTree $ [l, r]
+
 
 -- | Generates an arbitrary tree with a specified number of nodes
 genSizedTree :: Arbitrary a => Int -> Gen (Tree a)
@@ -66,6 +74,8 @@ toNodeInfo t = toNodeInfo' t 0 0
                                  (rightList, lastIndex) = toNodeInfo' l (leftIndex+1) (depth+1)
                                  completeList = leftList ++ thisNodeInfo:rightList
 
+-- given a filler element, intersperse it amongst a "sparse" list
+-- specified by (index,value) pairs
 intersperse :: a -> [(Int, a)] -> [a]
 intersperse filler = intersperse' 0 filler . sortBy (comparing fst)
         where intersperse' _ _ [] = []
