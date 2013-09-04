@@ -65,8 +65,10 @@ tests = [
         -- TODO: add tests for some problems
         testGroup "Problem 59" [
                 testProperty "no duplicates" $ forAllNaturalsUpTo 4 prop_hbalTree_noDups,
-                testProperty "correct depth" $ forAllNaturalsUpTo 4 prop_hbalTree_depth
-                -- TODO add more
+                testProperty "correct depth" $ forAllNaturalsUpTo 4 prop_hbalTree_depth,
+                testProperty "subtrees balanced"
+                    $ forAllNaturalsUpTo 4
+                    $ all prop_hbalTree_balance . hbalTree
             ],
         testGroup "Problem 60" [
                 testProperty "min nodes" $ forAllNaturalsUpTo 5 prop_hbalMinNodes_nodeCount
@@ -192,6 +194,11 @@ prop_hbalTree_noDups h = length trees == length (nub trees)
 prop_hbalTree_depth :: Int -> Bool
 prop_hbalTree_depth h = all (== h) $ map treeDepth trees
         where trees = hbalTree h
+
+prop_hbalTree_balance :: Tree a -> Bool
+prop_hbalTree_balance Empty          = True
+prop_hbalTree_balance (Branch _ l r) =
+    (<= 1) $ abs $ (treeDepth l) - (treeDepth r)
 
 -- could use 5 here?
 prop_hbalMinNodes_nodeCount :: Int -> Bool
