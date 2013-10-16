@@ -24,8 +24,9 @@ char isPrime(int n)
 int main(int argc, char const *argv[])
 {
     primes[0] = 2;
-    size_t pIndex = 1;
+    printf("2\n");
 
+    size_t pIndex = 1;
     int n = 3; // number to consider being prime
 
     while (pIndex < NUM_PRIMES)
